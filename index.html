@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/memordle-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memordle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Unbounded:wght@300;700;900&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <div class="header-inner">
+          <div class="logo-wrap">
+            <img src="/memordle-logo.png" alt="Memordle" class="logo-img" />
+          </div>
+          <button id="new-game">NEW GAME</button>
+        </div>
+        <p class="subtitle">Colors flash for half a second — then vanish into memory.</p>
+      </header>
+
+      <div id="message"></div>
+      <div id="answer-reveal"></div>
+
+      <main>
+        <div id="grid"></div>
+        <div id="keyboard"></div>
+      </main>
+
+      <div class="legend">
+        <div class="legend-item"><span class="legend-tile correct">A</span><span>Correct place</span></div>
+        <div class="legend-item"><span class="legend-tile present">A</span><span>Wrong place</span></div>
+        <div class="legend-item"><span class="legend-tile ghost-demo">A</span><span>Ghosted</span></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

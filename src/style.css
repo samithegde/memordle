@@ -1,0 +1,276 @@
+:root {
+  --bg: #ffffff;
+  --surface: #f5f5f5;
+  --border: #ccc;
+  --text: #1a1a1a;
+  --muted: #666;
+  --correct: #5a9e5a;
+  --present: #f5c842;
+  --absent: #ddd;
+  --ghost-border: #eee;
+  --ghost-text: #ccc;
+  --accent: #2a7a2a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 0 12px 40px;
+}
+
+#app {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* ── HEADER ── */
+header {
+  width: 100%;
+  padding: 18px 0 6px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 4px;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.logo-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
+}
+
+.subtitle {
+  font-size: 0.68rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  font-style: italic;
+}
+
+#new-game {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 7px 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  border-radius: 2px;
+}
+
+#new-game:hover {
+  background: var(--accent);
+  color: #000;
+}
+
+/* ── MESSAGES ── */
+#message {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  background: var(--text);
+  color: #000;
+  padding: 8px 20px;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  text-align: center;
+  min-height: 36px;
+  border-radius: 2px;
+}
+
+#message.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#message, #message.show {
+  background: #fff !important;
+  color: #111 !important;
+  border: 1px solid #ccc !important;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+}
+
+#answer-reveal {
+  font-family: 'Space Mono', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.5s;
+  min-height: 40px;
+  text-align: center;
+}
+
+#answer-reveal.show { opacity: 1; }
+
+/* ── GRID ── */
+#grid { display: flex; flex-direction: column; gap: 5px; }
+
+.row { display: flex; gap: 5px; }
+
+.cell {
+  width: 58px;
+  height: 58px;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--text);
+  transition: border-color 0.1s, background 0.4s, color 0.4s;
+  user-select: none;
+  border-radius: 3px;
+}
+
+.cell.filled { border-color: #888; }
+.cell.cursor { border-color: #444; }
+.cell.active-row.filled { animation: pop 0.1s ease; }
+
+/* Flash states */
+.cell.correct {
+  background: var(--correct);
+  border-color: var(--correct);
+  color: #fff;
+}
+
+.cell.present {
+  background: var(--present);
+  border-color: var(--present);
+  color: #000;
+}
+
+.cell.absent {
+  background: var(--absent);
+  border-color: #bbb;
+  color: #666;
+}
+
+/* Ghosted */
+.cell.ghost {
+  background: transparent !important;
+  border-color: var(--ghost-border) !important;
+  color: var(--ghost-text) !important;
+  transition: background 0.45s ease, color 0.45s ease, border-color 0.45s ease;
+}
+
+/* ── KEYBOARD ── */
+#keyboard { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+
+.kb-row { display: flex; justify-content: center; gap: 5px; }
+
+.key {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  height: 52px;
+  min-width: 35px;
+  padding: 0 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 3px;
+}
+
+.key:active { opacity: 0.7; }
+.key-wide { min-width: 54px; font-size: 0.58rem; letter-spacing: 0.02em; }
+
+/* Keyboard stays colored permanently */
+.key.kb-correct { background: var(--correct); border-color: var(--correct); color: #fff; }
+.key.kb-present { background: var(--present); border-color: var(--present); color: #000; }
+.key.kb-absent  { background: #ccc; border-color: #ccc; color: #666; }
+
+/* ── LEGEND ── */
+.legend {
+  display: flex;
+  gap: 28px;
+  font-size: 0.95rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  justify-content: center;
+  align-items: center;
+  margin-top: 18px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-tile {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+}
+
+.legend-tile.correct { background: var(--correct); color: #fff; border-color: var(--correct); }
+.legend-tile.present { background: var(--present); color: #000; border-color: var(--present); }
+.legend-tile.ghost-demo { background: #fff; color: var(--ghost-text); border-color: var(--ghost-border); }
+
+/* ── ANIMATIONS ── */
+@keyframes pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.shake { animation: shake 0.4s ease; }
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%     { transform: translateX(-6px); }
+  40%     { transform: translateX(6px); }
+  60%     { transform: translateX(-4px); }
+  80%     { transform: translateX(4px); }
+}
+
+@media (max-width: 420px) {
+  .cell { width: 48px; height: 48px; font-size: 1.2rem; }
+  .key  { min-width: 30px; height: 46px; font-size: 0.62rem; }
+  .key-wide { min-width: 48px; }
+  .logo-img { height: 36px; }
+}
