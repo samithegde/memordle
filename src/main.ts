@@ -8,6 +8,12 @@ const MAX_GUESSES = 6;
 const FLASH_DURATION = 600;
 const FADE_DURATION = 400;
 
+const KEYBOARD_ROWS = [
+  ['Q','W','E','R','T','Y','U','I','O','P'],
+  ['A','S','D','F','G','H','J','K','L'],
+  ['ENTER','Z','X','C','V','B','N','M','⌫'],
+];
+
 let state: GameState = {
   answer: getDailyWord(),
   guesses: createEmptyGrid(),
@@ -201,6 +207,35 @@ function newGame() {
   answerRevealEl.classList.remove('show');
   buildGrid(); buildKeyboard(); updateGrid(); updateKeyboard();
 }
+
+const EMOJI: Record<string, string> = { correct: '🟩', present: '🟨', absent: '⬜' };
+
+function getShareText(): string {
+  const guessCount = state.won ? state.currentRow + 1 : 'X';
+  const lines = [`Memordle ${guessCount}/${MAX_GUESSES}`, ''];
+  for (let r = 0; r <= state.currentRow; r++) {
+    const row = state.guesses[r];
+    if (row[0].state === 'empty') break;
+    lines.push(row.map(c => EMOJI[c.state] ?? '⬜').join(''));
+  }
+  return lines.join('\n');
+}
+
+function showSharePopup(text: string) {
+  shareText.value = text;
+  sharePopup.style.display = 'flex';
+}
+
+copyShareBtn.addEventListener('click', () => {
+  navigator.clipboard.writeText(shareText.value).then(() => {
+    copyShareBtn.textContent = 'Copied!';
+    setTimeout(() => (copyShareBtn.textContent = 'Copy'), 1500);
+  });
+});
+
+closeShareBtn.addEventListener('click', () => {
+  sharePopup.style.display = 'none';
+});
 
 document.addEventListener('keydown', e => {
   const key = e.key.toUpperCase();
