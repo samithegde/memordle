@@ -150,6 +150,9 @@ function submitGuess() {
     const row = state.currentRow;
     for (let c = 0; c < WORD_LENGTH; c++) state.guesses[row][c].revealed = true;
     updateGrid();
+    // Clear keyboard colors after flash
+    state.letterMap = {};
+    updateKeyboard();
     setTimeout(() => {
       isAnimating = false;
       checkEndGame(guess, results);
