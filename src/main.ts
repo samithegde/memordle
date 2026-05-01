@@ -26,12 +26,10 @@ const keyboardEl = document.getElementById('keyboard')!;
 const messageEl = document.getElementById('message')!;
 const answerRevealEl = document.getElementById('answer-reveal')!;
 const newGameBtn = document.getElementById('new-game')!;
-
-const KEYBOARD_ROWS = [
-  ['Q','W','E','R','T','Y','U','I','O','P'],
-  ['A','S','D','F','G','H','J','K','L'],
-  ['ENTER','Z','X','C','V','B','N','M','⌫'],
-];
+const sharePopup = document.getElementById('share-popup')!;
+const shareText = document.getElementById('share-text') as HTMLTextAreaElement;
+const copyShareBtn = document.getElementById('copy-share')!;
+const closeShareBtn = document.getElementById('close-share')!;
 
 function buildGrid() {
   gridEl.innerHTML = '';
@@ -166,13 +164,16 @@ function checkEndGame(_guess: string, results: LetterState[]) {
     state.gameOver = state.won = true;
     const msgs = ['Genius!','Magnificent!','Brilliant!','Great!','Nice!','Phew!'];
     showMessage(msgs[state.currentRow] || 'Nice!', true);
-    revealAnswer(); updateGrid(); return;
+    revealAnswer(); updateGrid();
+    setTimeout(() => showSharePopup(getShareText()), 800);
+    return;
   }
   state.currentRow++; state.currentCol = 0;
   if (state.currentRow >= MAX_GUESSES) {
     state.gameOver = true;
     showMessage(`The word was ${state.answer}`, true);
     revealAnswer();
+    setTimeout(() => showSharePopup(getShareText()), 800);
   }
   updateGrid(); updateKeyboard();
 }
