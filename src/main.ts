@@ -1,5 +1,5 @@
 import './style.css';
-import { getRandomWord, isValidGuess } from './words';
+import { getDailyWord, isValidGuess } from './words';
 import { createEmptyGrid, evaluateGuess } from './game';
 import type { LetterState, GameState } from './game';
 
@@ -9,7 +9,7 @@ const FLASH_DURATION = 600;
 const FADE_DURATION = 400;
 
 let state: GameState = {
-  answer: getRandomWord(),
+  answer: getDailyWord(),
   guesses: createEmptyGrid(),
   currentRow: 0,
   currentCol: 0,
@@ -190,7 +190,7 @@ function shakeRow(rowIndex: number) {
 
 function newGame() {
   state = {
-    answer: getRandomWord(),
+    answer: getDailyWord(),
     guesses: createEmptyGrid(),
     currentRow: 0, currentCol: 0,
     gameOver: false, won: false,
