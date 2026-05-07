@@ -132,7 +132,7 @@ header {
 #answer-reveal.show { opacity: 1; }
 
 /* ── GRID ── */
-#grid { display: flex; flex-direction: column; gap: 5px; }
+#grid { display: flex; flex-direction: column; gap: 5px; align-items: center; }
 
 .row { display: flex; gap: 5px; }
 
@@ -184,20 +184,32 @@ header {
 }
 
 /* ── KEYBOARD ── */
-#keyboard { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+#keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: auto;
+  margin: 0 auto;
+}
 
-.kb-row { display: flex; justify-content: center; gap: 5px; }
+.kb-row {
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+  flex-wrap: nowrap;
+}
 
 .key {
   font-family: 'Space Mono', monospace;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
   background: var(--surface);
   color: var(--text);
   border: 1px solid var(--border);
   height: 52px;
-  min-width: 35px;
-  padding: 0 4px;
+  min-width: 52px;
+  padding: 0 0;
+  width: 52px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -205,11 +217,11 @@ header {
   transition: background 0.2s, color 0.2s, border-color 0.2s;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  border-radius: 3px;
+  border-radius: 6px;
 }
 
 .key:active { opacity: 0.7; }
-.key-wide { min-width: 54px; font-size: 0.58rem; letter-spacing: 0.02em; }
+.key-wide { min-width: 64px; font-size: 0.66rem; letter-spacing: 0.03em; }
 
 /* Keyboard stays colored permanently */
 .key.kb-correct { background: var(--correct); border-color: var(--correct); color: #fff; }

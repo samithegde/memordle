@@ -2,6 +2,25 @@ import englishWords from 'an-array-of-english-words';
 
 export const WORDS: string[] = englishWords.filter(w => w.length === 6 && /^[A-Z]+$/i.test(w)).map(w => w.toUpperCase());
 
+function seededRng(seed: number) {
+  return () => {
+    seed = (seed * 48271) % 2147483647;
+    return seed / 2147483647;
+  };
+}
+
+function shuffleArray<T>(items: T[], seed: number): T[] {
+  const arr = items.slice();
+  const rand = seededRng(seed);
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+const SHUFFLED_WORDS = shuffleArray(WORDS, 421347);
+
 function getDayIndex(): number {
   // Days since a fixed epoch (e.g., Jan 1, 2022)
   const epoch = new Date(Date.UTC(2022, 0, 1));
@@ -11,8 +30,8 @@ function getDayIndex(): number {
 }
 
 export function getDailyWord(): string {
-  const idx = getDayIndex() % WORDS.length;
-  return WORDS[idx];
+  const idx = getDayIndex() % SHUFFLED_WORDS.length;
+  return SHUFFLED_WORDS[idx];
 }
 
 export function getRandomWord(): string {
