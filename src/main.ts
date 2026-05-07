@@ -218,6 +218,7 @@ function getShareText(): string {
     if (row[0].state === 'empty') break;
     lines.push(row.map(c => EMOJI[c.state] ?? '⬜').join(''));
   }
+  lines.push('', 'Play it at https://memordle.vercel.app');
   return lines.join('\n');
 }
 
