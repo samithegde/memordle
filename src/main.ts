@@ -1,5 +1,5 @@
 import './style.css';
-import { getDailyWord, isValidGuess } from './words';
+import { getDailyPuzzleId, getDailyWord, isValidGuess } from './words';
 import { createEmptyGrid, evaluateGuess } from './game';
 import type { LetterState, GameState } from './game';
 
@@ -7,6 +7,7 @@ const WORD_LENGTH = 6;
 const MAX_GUESSES = 6;
 const FLASH_DURATION = 600;
 const FADE_DURATION = 400;
+const STORAGE_KEY = 'memordle:daily-state:v1';
 
 const KEYBOARD_ROWS = [
   ['Q','W','E','R','T','Y','U','I','O','P'],
@@ -14,16 +15,94 @@ const KEYBOARD_ROWS = [
   ['ENTER','Z','X','C','V','B','N','M','⌫'],
 ];
 
-let state: GameState = {
-  answer: getDailyWord(),
-  guesses: createEmptyGrid(),
-  currentRow: 0,
-  currentCol: 0,
-  gameOver: false,
-  won: false,
-  letterMap: {},
-  ghostMap: {},
+type SavedGameState = GameState & {
+  puzzleId: number;
 };
+
+const dailyPuzzleId = getDailyPuzzleId();
+const dailyAnswer = getDailyWord();
+const LETTER_STATES: LetterState[] = ['correct', 'present', 'absent', 'empty', 'active'];
+
+function createNewState(): GameState {
+  return {
+    answer: dailyAnswer,
+    guesses: createEmptyGrid(),
+    currentRow: 0,
+    currentCol: 0,
+    gameOver: false,
+    won: false,
+    letterMap: {},
+    ghostMap: {},
+  };
+}
+
+function isValidSavedState(value: unknown): value is SavedGameState {
+  if (!value || typeof value !== 'object') return false;
+  const saved = value as Partial<SavedGameState>;
+  return (
+    saved.puzzleId === dailyPuzzleId &&
+    saved.answer === dailyAnswer &&
+    Array.isArray(saved.guesses) &&
+    saved.guesses.length === MAX_GUESSES &&
+    saved.guesses.every(row =>
+      Array.isArray(row) &&
+      row.length === WORD_LENGTH &&
+      row.every(cell =>
+        cell &&
+        typeof cell.letter === 'string' &&
+        LETTER_STATES.includes(cell.state) &&
+        typeof cell.revealed === 'boolean'
+      )
+    ) &&
+    typeof saved.currentRow === 'number' &&
+    saved.currentRow >= 0 &&
+    saved.currentRow <= MAX_GUESSES &&
+    typeof saved.currentCol === 'number' &&
+    saved.currentCol >= 0 &&
+    saved.currentCol <= WORD_LENGTH &&
+    typeof saved.gameOver === 'boolean' &&
+    typeof saved.won === 'boolean' &&
+    typeof saved.letterMap === 'object' &&
+    typeof saved.ghostMap === 'object'
+  );
+}
+
+function loadSavedState(): GameState {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return createNewState();
+    const saved = JSON.parse(raw);
+    if (!isValidSavedState(saved)) return createNewState();
+    return {
+      answer: saved.answer,
+      guesses: saved.guesses,
+      currentRow: saved.currentRow,
+      currentCol: saved.currentCol,
+      gameOver: saved.gameOver,
+      won: saved.won,
+      letterMap: saved.letterMap,
+      ghostMap: saved.ghostMap,
+    };
+  } catch {
+    return createNewState();
+  }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        puzzleId: dailyPuzzleId,
+        ...state,
+      })
+    );
+  } catch {
+    // Ignore storage failures so the game still works in private or restricted browsers.
+  }
+}
+
+let state: GameState = loadSavedState();
 
 let isAnimating = false;
 
@@ -122,6 +201,7 @@ function handleKey(key: string) {
     state.currentCol++;
   }
   updateGrid();
+  saveState();
 }
 
 function submitGuess() {
@@ -148,18 +228,21 @@ function submitGuess() {
 
   updateGrid();
   updateKeyboard();
+  saveState();
 
   // Ghost the grid cells after flash duration
   setTimeout(() => {
     const row = state.currentRow;
     for (let c = 0; c < WORD_LENGTH; c++) state.guesses[row][c].revealed = true;
     updateGrid();
+    saveState();
     // Clear keyboard colors after flash
     state.letterMap = {};
     updateKeyboard();
     setTimeout(() => {
       isAnimating = false;
       checkEndGame(guess, results);
+      saveState();
     }, FADE_DURATION);
   }, FLASH_DURATION);
 }
@@ -171,6 +254,7 @@ function checkEndGame(_guess: string, results: LetterState[]) {
     const msgs = ['Genius!','Magnificent!','Brilliant!','Great!','Nice!','Phew!'];
     showMessage(msgs[state.currentRow] || 'Nice!', true);
     revealAnswer(); updateGrid();
+    saveState();
     setTimeout(() => showSharePopup(getShareText()), 800);
     return;
   }
@@ -182,6 +266,7 @@ function checkEndGame(_guess: string, results: LetterState[]) {
     setTimeout(() => showSharePopup(getShareText()), 800);
   }
   updateGrid(); updateKeyboard();
+  saveState();
 }
 
 function revealAnswer() {
@@ -196,13 +281,8 @@ function shakeRow(rowIndex: number) {
 }
 
 function newGame() {
-  state = {
-    answer: getDailyWord(),
-    guesses: createEmptyGrid(),
-    currentRow: 0, currentCol: 0,
-    gameOver: false, won: false,
-    letterMap: {}, ghostMap: {},
-  };
+  state = createNewState();
+  saveState();
   messageEl.classList.remove('show');
   answerRevealEl.classList.remove('show');
   buildGrid(); buildKeyboard(); updateGrid(); updateKeyboard();
@@ -246,4 +326,9 @@ document.addEventListener('keydown', e => {
 });
 
 newGameBtn.addEventListener('click', newGame);
-buildGrid(); buildKeyboard(); updateGrid();
+buildGrid(); buildKeyboard(); updateGrid(); updateKeyboard();
+if (state.gameOver) {
+  revealAnswer();
+  if (state.won) showMessage('Already solved', true);
+  else showMessage(`The word was ${state.answer}`, true);
+}

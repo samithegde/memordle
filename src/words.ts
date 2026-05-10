@@ -21,7 +21,7 @@ function shuffleArray<T>(items: T[], seed: number): T[] {
 
 const SHUFFLED_WORDS = shuffleArray(WORDS, 421347);
 
-function getDayIndex(): number {
+export function getDailyPuzzleId(): number {
   // Days since a fixed epoch (e.g., Jan 1, 2022)
   const epoch = new Date(Date.UTC(2022, 0, 1));
   const now = new Date();
@@ -30,7 +30,7 @@ function getDayIndex(): number {
 }
 
 export function getDailyWord(): string {
-  const idx = getDayIndex() % SHUFFLED_WORDS.length;
+  const idx = getDailyPuzzleId() % SHUFFLED_WORDS.length;
   return SHUFFLED_WORDS[idx];
 }
 
