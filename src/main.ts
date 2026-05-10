@@ -156,6 +156,8 @@ let state: GameState = loadSavedState();
 let stats: GameStats = loadStats();
 
 let isAnimating = false;
+let flashTimer: number | undefined;
+let fadeTimer: number | undefined;
 
 const gridEl = document.getElementById('grid')!;
 const keyboardEl = document.getElementById('keyboard')!;
@@ -284,7 +286,7 @@ function submitGuess() {
   saveState();
 
   // Ghost the grid cells after flash duration
-  setTimeout(() => {
+  flashTimer = window.setTimeout(() => {
     const row = state.currentRow;
     for (let c = 0; c < WORD_LENGTH; c++) state.guesses[row][c].revealed = true;
     updateGrid();
@@ -292,7 +294,7 @@ function submitGuess() {
     // Clear keyboard colors after flash
     state.letterMap = {};
     updateKeyboard();
-    setTimeout(() => {
+    fadeTimer = window.setTimeout(() => {
       isAnimating = false;
       checkEndGame(guess, results);
       saveState();
@@ -336,6 +338,11 @@ function shakeRow(rowIndex: number) {
 }
 
 function newGame() {
+  if (flashTimer) window.clearTimeout(flashTimer);
+  if (fadeTimer) window.clearTimeout(fadeTimer);
+  flashTimer = undefined;
+  fadeTimer = undefined;
+  isAnimating = false;
   state = createNewState();
   saveState();
   messageEl.classList.remove('show');
