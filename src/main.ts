@@ -55,6 +55,12 @@ function createNewState(): GameState {
   };
 }
 
+function scheduleLocalMidnightRefresh() {
+  const now = new Date();
+  const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  window.setTimeout(() => window.location.reload(), nextMidnight.getTime() - now.getTime() + 1000);
+}
+
 function isValidSavedState(value: unknown): value is SavedGameState {
   if (!value || typeof value !== 'object') return false;
   const saved = value as Partial<SavedGameState>;
@@ -450,6 +456,7 @@ document.addEventListener('keydown', e => {
 });
 
 newGameBtn.addEventListener('click', newGame);
+scheduleLocalMidnightRefresh();
 buildGrid(); buildKeyboard(); updateGrid(); updateKeyboard();
 if (state.gameOver) {
   revealAnswer();

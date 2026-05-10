@@ -67,7 +67,24 @@ header {
   font-style: italic;
 }
 
-#new-game {
+.author-link {
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.author-link:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#new-game,
+.header-button {
   font-family: 'Space Mono', monospace;
   font-size: 0.62rem;
   font-weight: 700;
@@ -80,9 +97,11 @@ header {
   transition: all 0.2s;
   white-space: nowrap;
   border-radius: 2px;
+  text-decoration: none;
 }
 
-#new-game:hover {
+#new-game:hover,
+.header-button:hover {
   background: var(--accent);
   color: #000;
 }

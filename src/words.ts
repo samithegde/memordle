@@ -22,11 +22,10 @@ function shuffleArray<T>(items: T[], seed: number): T[] {
 const SHUFFLED_WORDS = shuffleArray(WORDS, 421347);
 
 export function getDailyPuzzleId(): number {
-  // Days since a fixed epoch (e.g., Jan 1, 2022)
-  const epoch = new Date(Date.UTC(2022, 0, 1));
   const now = new Date();
-  const diff = Math.floor((now.getTime() - epoch.getTime()) / (1000 * 60 * 60 * 24));
-  return diff;
+  const epochDay = Date.UTC(2022, 0, 1);
+  const localToday = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.floor((localToday - epochDay) / (1000 * 60 * 60 * 24));
 }
 
 export function getDailyWord(): string {
