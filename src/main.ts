@@ -8,6 +8,7 @@ const MAX_GUESSES = 6;
 const FLASH_DURATION = 600;
 const FADE_DURATION = 400;
 const STORAGE_KEY = 'memordle:daily-state:v1';
+const STATS_KEY = 'memordle:stats:v1';
 
 const KEYBOARD_ROWS = [
   ['Q','W','E','R','T','Y','U','I','O','P'],
@@ -19,9 +20,27 @@ type SavedGameState = GameState & {
   puzzleId: number;
 };
 
+type GameStats = {
+  played: number;
+  wins: number;
+  currentStreak: number;
+  maxStreak: number;
+  guessDistribution: number[];
+  lastRecordedPuzzleId: number | null;
+};
+
 const dailyPuzzleId = getDailyPuzzleId();
 const dailyAnswer = getDailyWord();
 const LETTER_STATES: LetterState[] = ['correct', 'present', 'absent', 'empty', 'active'];
+
+const DEFAULT_STATS: GameStats = {
+  played: 0,
+  wins: 0,
+  currentStreak: 0,
+  maxStreak: 0,
+  guessDistribution: Array(MAX_GUESSES).fill(0),
+  lastRecordedPuzzleId: null,
+};
 
 function createNewState(): GameState {
   return {
@@ -88,6 +107,33 @@ function loadSavedState(): GameState {
   }
 }
 
+function isValidStats(value: unknown): value is GameStats {
+  if (!value || typeof value !== 'object') return false;
+  const stats = value as Partial<GameStats>;
+  return (
+    typeof stats.played === 'number' &&
+    typeof stats.wins === 'number' &&
+    typeof stats.currentStreak === 'number' &&
+    typeof stats.maxStreak === 'number' &&
+    (typeof stats.lastRecordedPuzzleId === 'number' || stats.lastRecordedPuzzleId === null) &&
+    Array.isArray(stats.guessDistribution) &&
+    stats.guessDistribution.length === MAX_GUESSES &&
+    stats.guessDistribution.every(count => typeof count === 'number')
+  );
+}
+
+function loadStats(): GameStats {
+  try {
+    const raw = localStorage.getItem(STATS_KEY);
+    if (!raw) return { ...DEFAULT_STATS, guessDistribution: [...DEFAULT_STATS.guessDistribution] };
+    const stats = JSON.parse(raw);
+    if (!isValidStats(stats)) return { ...DEFAULT_STATS, guessDistribution: [...DEFAULT_STATS.guessDistribution] };
+    return stats;
+  } catch {
+    return { ...DEFAULT_STATS, guessDistribution: [...DEFAULT_STATS.guessDistribution] };
+  }
+}
+
 function saveState() {
   try {
     localStorage.setItem(
@@ -102,7 +148,16 @@ function saveState() {
   }
 }
 
+function saveStats() {
+  try {
+    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+  } catch {
+    // Ignore storage failures so gameplay and sharing still work.
+  }
+}
+
 let state: GameState = loadSavedState();
+let stats: GameStats = loadStats();
 
 let isAnimating = false;
 
@@ -113,6 +168,8 @@ const answerRevealEl = document.getElementById('answer-reveal')!;
 const newGameBtn = document.getElementById('new-game')!;
 const sharePopup = document.getElementById('share-popup')!;
 const shareText = document.getElementById('share-text') as HTMLTextAreaElement;
+const statsSummaryEl = document.getElementById('stats-summary')!;
+const statsDistributionEl = document.getElementById('stats-distribution')!;
 const copyShareBtn = document.getElementById('copy-share')!;
 const closeShareBtn = document.getElementById('close-share')!;
 
@@ -251,6 +308,7 @@ function checkEndGame(_guess: string, results: LetterState[]) {
   const won = results.every(r => r === 'correct');
   if (won) {
     state.gameOver = state.won = true;
+    recordGameResult(true, state.currentRow + 1);
     const msgs = ['Genius!','Magnificent!','Brilliant!','Great!','Nice!','Phew!'];
     showMessage(msgs[state.currentRow] || 'Nice!', true);
     revealAnswer(); updateGrid();
@@ -261,6 +319,7 @@ function checkEndGame(_guess: string, results: LetterState[]) {
   state.currentRow++; state.currentCol = 0;
   if (state.currentRow >= MAX_GUESSES) {
     state.gameOver = true;
+    recordGameResult(false);
     showMessage(`The word was ${state.answer}`, true);
     revealAnswer();
     setTimeout(() => showSharePopup(getShareText()), 800);
@@ -285,7 +344,70 @@ function newGame() {
   saveState();
   messageEl.classList.remove('show');
   answerRevealEl.classList.remove('show');
+  sharePopup.style.display = 'none';
   buildGrid(); buildKeyboard(); updateGrid(); updateKeyboard();
+}
+
+function recordGameResult(won: boolean, guessCount?: number) {
+  if (stats.lastRecordedPuzzleId === dailyPuzzleId) return;
+
+  stats.played++;
+  stats.lastRecordedPuzzleId = dailyPuzzleId;
+
+  if (won && guessCount) {
+    stats.wins++;
+    stats.currentStreak++;
+    stats.maxStreak = Math.max(stats.maxStreak, stats.currentStreak);
+    stats.guessDistribution[guessCount - 1]++;
+  } else {
+    stats.currentStreak = 0;
+  }
+
+  saveStats();
+}
+
+function renderStats() {
+  const winPercent = stats.played ? Math.round((stats.wins / stats.played) * 100) : 0;
+  const summaryItems = [
+    ['Played', stats.played],
+    ['Win %', winPercent],
+    ['Current Streak', stats.currentStreak],
+    ['Max Streak', stats.maxStreak],
+  ];
+
+  statsSummaryEl.innerHTML = '';
+  summaryItems.forEach(([label, value]) => {
+    const item = document.createElement('div');
+    item.className = 'stats-summary-item';
+
+    const valueEl = document.createElement('strong');
+    valueEl.textContent = String(value);
+
+    const labelEl = document.createElement('span');
+    labelEl.textContent = String(label);
+
+    item.append(valueEl, labelEl);
+    statsSummaryEl.appendChild(item);
+  });
+
+  const maxGuessCount = Math.max(1, ...stats.guessDistribution);
+  statsDistributionEl.innerHTML = '<h2>Guess Distribution</h2>';
+  stats.guessDistribution.forEach((count, index) => {
+    const row = document.createElement('div');
+    row.className = 'stats-row';
+
+    const label = document.createElement('span');
+    label.className = 'stats-row-label';
+    label.textContent = String(index + 1);
+
+    const bar = document.createElement('div');
+    bar.className = 'stats-bar';
+    bar.style.width = `${Math.max(8, (count / maxGuessCount) * 100)}%`;
+    bar.textContent = String(count);
+
+    row.append(label, bar);
+    statsDistributionEl.appendChild(row);
+  });
 }
 
 const EMOJI: Record<string, string> = { correct: '🟩', present: '🟨', absent: '⬜' };
@@ -293,7 +415,8 @@ const EMOJI: Record<string, string> = { correct: '🟩', present: '🟨', absent
 function getShareText(): string {
   const guessCount = state.won ? state.currentRow + 1 : 'X';
   const lines = [`Memordle ${guessCount}/${MAX_GUESSES}`, ''];
-  for (let r = 0; r <= state.currentRow; r++) {
+  const finalRow = Math.min(state.currentRow, MAX_GUESSES - 1);
+  for (let r = 0; r <= finalRow; r++) {
     const row = state.guesses[r];
     if (row[0].state === 'empty') break;
     lines.push(row.map(c => EMOJI[c.state] ?? '⬜').join(''));
@@ -303,6 +426,7 @@ function getShareText(): string {
 }
 
 function showSharePopup(text: string) {
+  renderStats();
   shareText.value = text;
   sharePopup.style.display = 'flex';
 }
