@@ -30,7 +30,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: px;
 }
 
 /* ── HEADER ── */
@@ -39,7 +39,7 @@ header {
   padding: 18px 0 6px;
   text-align: center;
   border-bottom: 1px solid #ddd;
-  margin-bottom: 4px;
+  margin-bottom: 0px;
 }
 
 .header-inner {
