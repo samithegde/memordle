@@ -10,33 +10,46 @@
   --ghost-border: #eee;
   --ghost-text: #ccc;
   --accent: #2a7a2a;
+  --cell-size: clamp(42px, min(13.6vw, 7.4dvh), 58px);
+  --cell-gap: clamp(4px, 1.2vw, 5px);
+  --key-gap: clamp(3px, 1vw, 9px);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  min-height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
 
 body {
   background: var(--bg);
   color: var(--text);
   font-family: 'Space Mono', monospace;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
-  padding: 0 12px 40px;
+  padding: 0 max(8px, env(safe-area-inset-left)) calc(12px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-right));
+  overflow-x: hidden;
+  touch-action: manipulation;
 }
 
 #app {
   width: 100%;
-  max-width: 500px;
+  max-width: 640px;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: px;
+  gap: clamp(4px, 1dvh, 14px);
 }
 
 /* ── HEADER ── */
 header {
   width: 100%;
-  padding: 18px 0 6px;
+  padding: clamp(10px, 2.4dvh, 18px) 0 6px;
   text-align: center;
   border-bottom: 1px solid #ddd;
   margin-bottom: 0px;
@@ -52,10 +65,13 @@ header {
 .logo-wrap {
   display: flex;
   align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
 .logo-img {
-  height: 44px;
+  height: clamp(34px, 8.5vw, 44px);
+  max-width: min(46vw, 230px);
   width: auto;
   object-fit: contain;
 }
@@ -80,7 +96,8 @@ header {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: clamp(5px, 1.4vw, 8px);
+  flex-shrink: 0;
 }
 
 #new-game,
@@ -98,6 +115,11 @@ header {
   white-space: nowrap;
   border-radius: 2px;
   text-decoration: none;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
 }
 
 #new-game:hover,
@@ -114,7 +136,8 @@ header {
   letter-spacing: 0.12em;
   background: var(--text);
   color: #000;
-  padding: 8px 20px;
+  width: min(100%, 420px);
+  padding: 8px 12px;
   opacity: 0;
   transform: translateY(-8px);
   transition: opacity 0.2s, transform 0.2s;
@@ -138,7 +161,7 @@ header {
 
 #answer-reveal {
   font-family: 'Space Mono', monospace;
-  font-size: 1.5rem;
+  font-size: clamp(1.15rem, 5.6vw, 1.5rem);
   font-weight: 700;
   letter-spacing: 0.35em;
   color: var(--accent);
@@ -150,21 +173,42 @@ header {
 
 #answer-reveal.show { opacity: 1; }
 
-/* ── GRID ── */
-#grid { display: flex; flex-direction: column; gap: 5px; align-items: center; }
+main {
+  width: 100%;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 2dvh, 16px);
+  min-height: 0;
+}
 
-.row { display: flex; gap: 5px; }
+/* ── GRID ── */
+#grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cell-gap);
+  align-items: center;
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  gap: var(--cell-gap);
+  max-width: 100%;
+}
 
 .cell {
-  width: 58px;
-  height: 58px;
+  width: var(--cell-size);
+  height: var(--cell-size);
   border: 2px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Space Mono', monospace;
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: clamp(1.15rem, 5.2vw, 1.5rem);
   color: var(--text);
   transition: border-color 0.1s, background 0.4s, color 0.4s;
   user-select: none;
@@ -206,29 +250,33 @@ header {
 #keyboard {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  width: auto;
+  gap: clamp(5px, 1.4dvh, 6px);
+  width: min(100%, 620px);
   margin: 0 auto;
+  padding: 0 0 max(2px, env(safe-area-inset-bottom));
 }
 
 .kb-row {
   display: flex;
   justify-content: center;
-  gap: 9px;
+  gap: var(--key-gap);
   flex-wrap: nowrap;
+  width: 100%;
 }
 
 .key {
   font-family: 'Space Mono', monospace;
-  font-size: 0.72rem;
+  font-size: clamp(0.62rem, 2.8vw, 0.72rem);
   font-weight: 700;
   background: var(--surface);
   color: var(--text);
   border: 1px solid var(--border);
-  height: 52px;
-  min-width: 52px;
+  height: clamp(42px, 8.7dvh, 52px);
+  min-width: 0;
   padding: 0 0;
-  width: 52px;
+  width: auto;
+  flex: 1 1 0;
+  max-width: 52px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -237,10 +285,16 @@ header {
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   border-radius: 6px;
+  touch-action: manipulation;
 }
 
 .key:active { opacity: 0.7; }
-.key-wide { min-width: 64px; font-size: 0.66rem; letter-spacing: 0.03em; }
+.key-wide {
+  flex-grow: 1.35;
+  max-width: 70px;
+  font-size: clamp(0.54rem, 2.3vw, 0.66rem);
+  letter-spacing: 0.03em;
+}
 
 /* Keyboard stays colored permanently */
 .key.kb-correct { background: var(--correct); border-color: var(--correct); color: #fff; }
@@ -250,13 +304,15 @@ header {
 /* ── LEGEND ── */
 .legend {
   display: flex;
-  gap: 28px;
-  font-size: 0.95rem;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+  font-size: clamp(0.68rem, 2.8vw, 0.95rem);
   color: var(--muted);
   letter-spacing: 0.05em;
   justify-content: center;
   align-items: center;
-  margin-top: 18px;
+  margin: 4px 0 0;
+  padding-bottom: 6px;
 }
 
 .legend-item {
@@ -266,8 +322,8 @@ header {
 }
 
 .legend-tile {
-  width: 28px;
-  height: 28px;
+  width: clamp(22px, 6vw, 28px);
+  height: clamp(22px, 6vw, 28px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -358,6 +414,79 @@ header {
   transition: width 0.25s ease;
 }
 
+.share-popup {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: rgba(0, 0, 0, 0.18);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+
+.share-dialog {
+  width: min(100%, 420px);
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  background: #fff;
+  color: #222;
+  border-radius: 8px;
+  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.13);
+  padding: clamp(18px, 5vw, 32px) clamp(14px, 4vw, 24px);
+  text-align: center;
+}
+
+.share-heading {
+  font-size: clamp(1rem, 4.5vw, 1.2rem);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.share-text {
+  width: 100%;
+  min-height: 88px;
+  font-family: 'Space Mono', monospace;
+  font-size: 1rem;
+  margin-bottom: 16px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  resize: vertical;
+}
+
+.share-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.share-primary,
+.share-secondary {
+  min-height: 40px;
+  min-width: 96px;
+  font-family: 'Space Mono', monospace;
+  font-size: 1rem;
+  padding: 7px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.share-primary {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.share-secondary {
+  border: 1px solid #ccc;
+  background: #eee;
+  color: #222;
+}
+
 /* ── ANIMATIONS ── */
 @keyframes pop {
   0%   { transform: scale(1); }
@@ -376,9 +505,83 @@ header {
 }
 
 @media (max-width: 420px) {
-  .cell { width: 48px; height: 48px; font-size: 1.2rem; }
-  .key  { min-width: 30px; height: 46px; font-size: 0.62rem; }
-  .key-wide { min-width: 48px; }
-  .logo-img { height: 36px; }
+  #app { gap: 6px; }
+
+  .header-inner {
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .logo-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+  }
+
+  .header-actions {
+    padding-top: 2px;
+  }
+
+  #new-game,
+  .header-button {
+    min-height: 34px;
+    padding: 6px 8px;
+    font-size: 0.54rem;
+    letter-spacing: 0.06em;
+  }
+
+  header > .subtitle {
+    font-size: 0.58rem;
+    line-height: 1.25;
+    max-width: 34ch;
+    margin: 0 auto;
+  }
+
+  main {
+    justify-content: space-evenly;
+    gap: 8px;
+  }
+
   .stats-summary { grid-template-columns: repeat(2, minmax(74px, 1fr)); }
+
+  .legend {
+    gap: 8px 12px;
+    line-height: 1.1;
+  }
+}
+
+@media (max-width: 340px), (max-height: 660px) {
+  :root {
+    --cell-size: clamp(37px, min(13.2vw, 6.7dvh), 46px);
+    --key-gap: 3px;
+  }
+
+  .subtitle.author-link {
+    display: none;
+  }
+
+  #message {
+    min-height: 30px;
+    padding: 6px 10px;
+    font-size: 0.68rem;
+  }
+
+  #answer-reveal {
+    min-height: 28px;
+  }
+
+  .key {
+    height: clamp(38px, 7.6dvh, 44px);
+    border-radius: 5px;
+  }
+
+  .legend {
+    display: none;
+  }
+}
+
+@media (min-width: 421px) {
+  .kb-row:first-child .key {
+    max-width: 54px;
+  }
 }

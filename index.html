@@ -9,9 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Unbounded:wght@300;700;900&display=swap" rel="stylesheet">
     <meta name="google-site-verification" content="okSt1r6HDRi0MstlOTm2LvISUe1NUy6nEC79KXXXmn8" />
-    <div id="app">
   </head>
   <body>
+    <div id="app">
       <header>
         <div class="header-inner">
           <div class="logo-wrap">
@@ -40,16 +40,16 @@
         <div class="legend-item"><span class="legend-tile ghost-demo">A</span><span>Ghosted</span></div>
       </div>
 
-      <div id="share-popup" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.18); z-index:1000; align-items:center; justify-content:center;">
-        <div style="background:#fff; color:#222; border-radius:8px; box-shadow:0 2px 16px 0 rgba(0,0,0,0.13); padding:32px 24px; min-width:280px; max-width:90vw; text-align:center;">
-          <div style="font-size:1.2rem; font-weight:700; margin-bottom:12px;">Statistics</div>
+      <div id="share-popup" class="share-popup" style="display:none;">
+        <div class="share-dialog">
+          <div class="share-heading">Statistics</div>
           <div id="stats-summary" class="stats-summary"></div>
           <div id="stats-distribution" class="stats-distribution" aria-label="Guess distribution"></div>
-          <div style="font-size:1.2rem; font-weight:700; margin-bottom:12px;">Share your result!</div>
-          <textarea id="share-text" readonly style="width:100%; min-height:60px; font-size:1rem; margin-bottom:16px; border-radius:4px; border:1px solid #ccc; padding:8px;"></textarea>
-          <div style="display:flex; gap:10px; justify-content:center;">
-            <button id="copy-share" style="font-size:1rem; padding:7px 18px; border-radius:4px; border:1px solid #2a7a2a; background:#2a7a2a; color:#fff; cursor:pointer;">Copy</button>
-            <button id="close-share" style="font-size:1rem; padding:7px 18px; border-radius:4px; border:1px solid #ccc; background:#eee; color:#222; cursor:pointer;">Close</button>
+          <div class="share-heading">Share your result!</div>
+          <textarea id="share-text" class="share-text" readonly></textarea>
+          <div class="share-actions">
+            <button id="copy-share" class="share-primary">Copy</button>
+            <button id="close-share" class="share-secondary">Close</button>
           </div>
         </div>
       </div>
